@@ -38,6 +38,7 @@ public class Main {
                     }
 
                     HashMap m = new HashMap();
+                    m.put("replyId", replyId);
                     m.put("messages", subset);
                     m.put("username", username);
                     return new ModelAndView(m, "home.html");
@@ -71,6 +72,25 @@ public class Main {
                     Session session = request.session();
                     session.invalidate();
                     response.redirect("/");
+                    return "";
+                }
+        );
+        Spark.post(
+                "/create-message",
+                (request, response) -> {
+                    Session session = request.session();
+                    String username = session.attribute("username");
+                    if (username == null){
+                        throw new Exception("Not logged in");
+                    }
+
+                    int replyId = Integer.valueOf(request.queryParams("replyId"));
+                    String text = request.queryParams("message");
+
+                    Message msg = new Message(messages.size(), replyId, username, text);
+                    messages.add(msg);
+
+                    response.redirect(request.headers("Referer"));
                     return "";
                 }
         );
